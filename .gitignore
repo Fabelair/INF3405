@@ -1,0 +1,14 @@
+# Dépendances / build
+node_modules/
+__pycache__/
+*.pyc
+build/
+dist/
+.venv/
+venv/
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
