@@ -7,17 +7,17 @@ réseau externe). Couvre l'ensemble des requis fonctionnels de la **section 4**.
 
 ```
 tp1/
-├── Serveur/                              Projet Eclipse du serveur
+├── Serveur/                    Projet Eclipse du serveur
 │   └── src/inf3405/serveur/
-│       ├── Serveur.java                  Saisie/validation IP+port, boucle accept()
-│       ├── GestionnaireClient.java       Un thread par client (auth, réception, diffusion)
-│       ├── GestionnaireUtilisateurs.java Base utilisateurs + authentification (§4.3)
-│       ├── HistoriqueMessages.java       Historique + diffusion (§4.4/§4.5)
-│       └── Message.java                  Format d'affichage imposé (§4.4)
-└── Client/                               Projet Eclipse du client
+│       ├── Serveur.java        Point d'entrée, boucle accept()
+│       ├── Saisie.java         Lecture/validation IP et port
+│       ├── Connexion.java      Un thread par client (auth, réception)
+│       ├── Etat.java           Comptes, connectés, historique, diffusion, format
+│       └── Stockage.java       utilisateurs.txt et historique.txt
+└── Client/                     Projet Eclipse du client
     └── src/inf3405/client/
-        ├── Client.java                   Saisie/validation, connexion, envoi
-        └── RecepteurMessages.java        Thread d'écoute des messages entrants
+        ├── Client.java         Connexion, envoi, thread d'écoute
+        └── Saisie.java         Lecture/validation IP, port, champs
 ```
 
 ## Compilation (ligne de commande)
@@ -67,8 +67,8 @@ Ces fichiers sont rechargés au redémarrage du serveur.
 
 | Requis | Emplacement |
 |--------|-------------|
-| 4.1 Serveur (validation IP/port, multi-clients, diffusion, arrêt propre) | `Serveur`, `GestionnaireClient`, `HistoriqueMessages` |
-| 4.2 Client (validation, auth, 15 récents, ≤200 car., temps réel) | `Client`, `RecepteurMessages` |
-| 4.3 Authentification (4 cas, création auto) | `GestionnaireUtilisateurs.authentifier` |
-| 4.4 Communications et format d'affichage | `Message`, `HistoriqueMessages.diffuser` |
-| 4.5 Persistance (utilisateurs + historique) | `GestionnaireUtilisateurs`, `HistoriqueMessages` |
+| 4.1 Serveur (validation IP/port, multi-clients, diffusion, arrêt propre) | `Serveur`, `Saisie`, `Connexion`, `Etat.diffuser` |
+| 4.2 Client (validation, auth, 15 récents, ≤200 car., temps réel) | `Client`, `Saisie`, `Etat.rejoindre` |
+| 4.3 Authentification (4 cas, création auto) | `Etat.authentifier` |
+| 4.4 Communications et format d'affichage | `Etat.diffuser` |
+| 4.5 Persistance (utilisateurs + historique) | `Stockage` |

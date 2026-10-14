@@ -9,20 +9,18 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class GestionnaireClient implements Runnable {
+public class Connexion implements Runnable {
 
     private final Socket socket;
-    private final GestionnaireUtilisateurs gestionnaireUtilisateurs;
-    private final HistoriqueMessages historique;
+    private final Etat etat;
 
     private DataInputStream entree;
     private DataOutputStream sortie;
     private String nomUtilisateur;
 
-    public GestionnaireClient(Socket socket, GestionnaireUtilisateurs gestionnaireUtilisateurs, HistoriqueMessages historique) {
+    public Connexion(Socket socket, Etat etat) {
         this.socket = socket;
-        this.gestionnaireUtilisateurs = gestionnaireUtilisateurs;
-        this.historique = historique;
+        this.etat = etat;
     }
 
     @Override
@@ -33,9 +31,9 @@ public class GestionnaireClient implements Runnable {
 
             String nom = entree.readUTF();
             String motDePasse = entree.readUTF();
-            GestionnaireUtilisateurs.Resultat resultat = gestionnaireUtilisateurs.authentifier(nom, motDePasse);
+            Etat.Resultat resultat = etat.authentifier(nom, motDePasse);
 
-            if (resultat != GestionnaireUtilisateurs.Resultat.ACCEPTE) {
+            if (resultat != Etat.Resultat.ACCEPTE) {
                 sortie.writeUTF("ERREUR");
                 sortie.writeUTF(messageRefus(resultat));
                 sortie.flush();
@@ -46,11 +44,7 @@ public class GestionnaireClient implements Runnable {
             sortie.writeUTF("OK");
             sortie.flush();
 
-            for (String message : historique.messagesRecents()) {
-                envoyer(message);
-            }
-
-            historique.enregistrerClient(this);
+            etat.rejoindre(this);
 
             String ip = socket.getInetAddress().getHostAddress();
             int port = socket.getPort();
@@ -58,8 +52,7 @@ public class GestionnaireClient implements Runnable {
 
             while (true) {
                 String contenu = entree.readUTF();
-                Message message = new Message(nom, ip, port, contenu);
-                historique.diffuser(message.toString());
+                etat.diffuser(nom, ip, port, contenu);
             }
         } catch (EOFException | SocketException e) {
             System.out.println("Connexion fermee par le client.");
@@ -67,8 +60,7 @@ public class GestionnaireClient implements Runnable {
             System.err.println("Erreur avec un client : " + e.getMessage());
         } finally {
             if (nomUtilisateur != null) {
-                gestionnaireUtilisateurs.deconnecter(nomUtilisateur);
-                historique.retirerClient(this);
+                etat.quitter(this, nomUtilisateur);
                 System.out.println("Deconnexion : " + nomUtilisateur);
             }
             fermer();
@@ -84,7 +76,7 @@ public class GestionnaireClient implements Runnable {
         }
     }
 
-    private String messageRefus(GestionnaireUtilisateurs.Resultat resultat) {
+    private String messageRefus(Etat.Resultat resultat) {
         switch (resultat) {
             case DEJA_CONNECTE:
                 return "Cet utilisateur est deja connecte.";

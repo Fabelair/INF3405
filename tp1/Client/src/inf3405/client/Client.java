@@ -7,24 +7,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class Client {
 
-    private static final int PORT_MIN = 5000;
-    private static final int PORT_MAX = 5050;
     private static final int LONGUEUR_MAX_MESSAGE = 200;
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        String adresseIP = lireAdresseIP(scanner);
-        int port = lirePort(scanner);
-
-        System.out.print("Nom d'utilisateur : ");
-        String nomUtilisateur = scanner.nextLine().trim();
-        System.out.print("Mot de passe : ");
-        String motDePasse = scanner.nextLine().trim();
+        Saisie saisie = new Saisie();
+        String adresseIP = saisie.lireAdresseIP();
+        int port = saisie.lirePort();
+        String nomUtilisateur = saisie.lireChamp("Nom d'utilisateur : ");
+        String motDePasse = saisie.lireChamp("Mot de passe : ");
 
         try (Socket socket = new Socket(adresseIP, port)) {
             DataInputStream entree = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -45,12 +38,12 @@ public class Client {
             System.out.println("Tapez vos messages (max " + LONGUEUR_MAX_MESSAGE
                     + " caracteres). Tapez /quit pour quitter.\n");
 
-            Thread recepteur = new Thread(new RecepteurMessages(entree));
+            Thread recepteur = new Thread(() -> ecouter(entree));
             recepteur.setDaemon(true);
             recepteur.start();
 
             while (true) {
-                String message = scanner.nextLine();
+                String message = saisie.lireLigne();
                 if (message.equals("/quit")) {
                     break;
                 }
@@ -73,48 +66,13 @@ public class Client {
         System.out.println("Deconnecte.");
     }
 
-    private static String lireAdresseIP(Scanner scanner) {
-        while (true) {
-            System.out.print("Adresse IP du serveur : ");
-            String ip = scanner.nextLine().trim();
-            if (adresseIPValide(ip)) {
-                return ip;
+    private static void ecouter(DataInputStream entree) {
+        try {
+            while (true) {
+                System.out.println(entree.readUTF());
             }
-            System.out.println("Adresse IP invalide (quatre octets, ex. 127.0.0.1).");
+        } catch (IOException e) {
+            System.out.println("Connexion au serveur perdue.");
         }
-    }
-
-    private static int lirePort(Scanner scanner) {
-        while (true) {
-            System.out.print("Numero de port (" + PORT_MIN + " a " + PORT_MAX + ") : ");
-            String saisie = scanner.nextLine().trim();
-            try {
-                int port = Integer.parseInt(saisie);
-                if (port >= PORT_MIN && port <= PORT_MAX) {
-                    return port;
-                }
-                System.out.println("Port invalide (entier entre " + PORT_MIN + " et " + PORT_MAX + ").");
-            } catch (NumberFormatException e) {
-                System.out.println("Port invalide (\"" + saisie + "\" n'est pas un nombre entier).");
-            }
-        }
-    }
-
-    public static boolean adresseIPValide(String ip) {
-        String[] octets = ip.split("\\.");
-        if (octets.length != 4) {
-            return false;
-        }
-        for (String octet : octets) {
-            try {
-                int valeur = Integer.parseInt(octet);
-                if (valeur < 0 || valeur > 255) {
-                    return false;
-                }
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return true;
     }
 }
