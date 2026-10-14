@@ -6,13 +6,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-/**
- * Point d'entree du serveur de clavardage (requis 4.1).
- *
- * Au demarrage, demande l'adresse IP d'ecoute et le port (5000-5050), valide
- * les saisies, puis accepte simultanement plusieurs connexions clientes en
- * creant un thread {@link ClientHandler} par client.
- */
 public class Server {
 
     private static final int PORT_MIN = 5000;
@@ -24,7 +17,6 @@ public class Server {
         String adresseIP = lireAdresseIP(scanner);
         int port = lirePort(scanner);
 
-        // Structures partagees entre tous les clients (thread-safe).
         UserManager gestionnaireUtilisateurs = new UserManager();
         MessageHistory historique = new MessageHistory();
 
@@ -32,17 +24,14 @@ public class Server {
             System.out.println("Serveur demarre sur " + adresseIP + ":" + port);
             System.out.println("En attente de connexions...");
 
-            // Fermeture propre des ressources lors de l'arret (requis 4.1).
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("\nArret du serveur...");
                 try {
                     serveur.close();
                 } catch (IOException ignore) {
-                    // Le serveur est deja ferme.
                 }
             }));
 
-            // Boucle d'acceptation : un thread par client connecte.
             while (true) {
                 Socket socket = serveur.accept();
                 ClientHandler handler = new ClientHandler(socket, gestionnaireUtilisateurs, historique);
@@ -53,7 +42,6 @@ public class Server {
         }
     }
 
-    /** Demande et valide l'adresse IP (quatre octets) jusqu'a obtenir une saisie valide. */
     private static String lireAdresseIP(Scanner scanner) {
         while (true) {
             System.out.print("Entrez l'adresse IP d'ecoute du serveur : ");
@@ -65,7 +53,6 @@ public class Server {
         }
     }
 
-    /** Demande et valide le port (plage 5000-5050) jusqu'a obtenir une saisie valide. */
     private static int lirePort(Scanner scanner) {
         while (true) {
             System.out.print("Entrez le numero de port (" + PORT_MIN + " a " + PORT_MAX + ") : ");
@@ -76,15 +63,11 @@ public class Server {
                     return port;
                 }
             } catch (NumberFormatException ignore) {
-                // Retombe sur le message d'erreur ci-dessous.
             }
             System.out.println("Port invalide. Entier compris entre " + PORT_MIN + " et " + PORT_MAX + ".");
         }
     }
 
-    /**
-     * Valide une adresse IPv4 : exactement quatre octets, chacun compris entre 0 et 255.
-     */
     public static boolean adresseIPValide(String ip) {
         if (ip == null) {
             return false;

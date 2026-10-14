@@ -3,13 +3,6 @@ package inf3405.serveur;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Represente un message de clavardage (requis 4.4).
- *
- * L'horodatage est fixe au moment de la creation. La representation textuelle
- * respecte le format impose :
- * {@code [Nom d'utilisateur - Adresse IP:Port - AAAA-MM-JJ@HH:MM:SS] : Message}
- */
 public class Message {
 
     private static final DateTimeFormatter FORMAT_DATE =

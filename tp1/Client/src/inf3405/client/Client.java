@@ -9,14 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
-/**
- * Client de clavardage (requis 4.2).
- *
- * Demande l'adresse IP du serveur, le port, un nom d'utilisateur et un mot de
- * passe, valide les saisies, se connecte, s'authentifie, puis permet d'envoyer
- * des messages (max 200 caracteres) tout en recevant en temps reel les messages
- * diffuses par le serveur (via {@link MessageReceiver}).
- */
 public class Client {
 
     private static final int PORT_MIN = 5000;
@@ -38,12 +30,10 @@ public class Client {
             DataInputStream entree = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream sortie = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-            // Envoi des informations d'authentification.
             sortie.writeUTF(nomUtilisateur);
             sortie.writeUTF(motDePasse);
             sortie.flush();
 
-            // Reponse du serveur.
             String reponse = entree.readUTF();
             if (!reponse.equals("OK")) {
                 String raison = entree.readUTF();
@@ -55,12 +45,10 @@ public class Client {
             System.out.println("Tapez vos messages (max " + LONGUEUR_MAX_MESSAGE
                     + " caracteres). Tapez /quit pour quitter.\n");
 
-            // Thread d'ecoute des messages entrants (recoit aussi les 15 recents).
             Thread recepteur = new Thread(new MessageReceiver(entree));
             recepteur.setDaemon(true);
             recepteur.start();
 
-            // Boucle d'envoi des messages.
             while (true) {
                 String message = scanner.nextLine();
                 if (message.equals("/quit")) {
@@ -85,7 +73,6 @@ public class Client {
         System.out.println("Deconnecte.");
     }
 
-    /** Demande et valide le format de l'adresse IP (requis 4.2). */
     private static String lireAdresseIP(Scanner scanner) {
         while (true) {
             System.out.print("Adresse IP du serveur : ");
@@ -97,7 +84,6 @@ public class Client {
         }
     }
 
-    /** Demande et valide le format du port (plage 5000-5050). */
     private static int lirePort(Scanner scanner) {
         while (true) {
             System.out.print("Numero de port (" + PORT_MIN + " a " + PORT_MAX + ") : ");
@@ -108,13 +94,11 @@ public class Client {
                     return port;
                 }
             } catch (NumberFormatException ignore) {
-                // Retombe sur le message d'erreur ci-dessous.
             }
             System.out.println("Port invalide (entier entre " + PORT_MIN + " et " + PORT_MAX + ").");
         }
     }
 
-    /** Valide une adresse IPv4 : exactement quatre octets entre 0 et 255. */
     public static boolean adresseIPValide(String ip) {
         if (ip == null) {
             return false;
