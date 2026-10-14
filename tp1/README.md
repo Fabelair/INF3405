@@ -7,17 +7,17 @@ réseau externe). Couvre l'ensemble des requis fonctionnels de la **section 4**.
 
 ```
 tp1/
-├── Serveur/                        Projet Eclipse du serveur
+├── Serveur/                              Projet Eclipse du serveur
 │   └── src/inf3405/serveur/
-│       ├── Server.java             Saisie/validation IP+port, boucle accept()
-│       ├── ClientHandler.java      Un thread par client (auth, réception, diffusion)
-│       ├── UserManager.java        Base utilisateurs + authentification (§4.3)
-│       ├── MessageHistory.java     Historique + diffusion (§4.4/§4.5)
-│       └── Message.java            Format d'affichage imposé (§4.4)
-└── Client/                         Projet Eclipse du client
+│       ├── Serveur.java                  Saisie/validation IP+port, boucle accept()
+│       ├── GestionnaireClient.java       Un thread par client (auth, réception, diffusion)
+│       ├── GestionnaireUtilisateurs.java Base utilisateurs + authentification (§4.3)
+│       ├── HistoriqueMessages.java       Historique + diffusion (§4.4/§4.5)
+│       └── Message.java                  Format d'affichage imposé (§4.4)
+└── Client/                               Projet Eclipse du client
     └── src/inf3405/client/
-        ├── Client.java             Saisie/validation, connexion, envoi
-        └── MessageReceiver.java    Thread d'écoute des messages entrants
+        ├── Client.java                   Saisie/validation, connexion, envoi
+        └── RecepteurMessages.java        Thread d'écoute des messages entrants
 ```
 
 ## Compilation (ligne de commande)
@@ -35,7 +35,7 @@ Démarrer d'abord le serveur, puis un ou plusieurs clients.
 
 ```bash
 # Serveur : demande l'IP d'écoute puis le port (5000–5050)
-java -cp Serveur/bin inf3405.serveur.Server
+java -cp Serveur/bin inf3405.serveur.Serveur
 
 # Client (dans un autre terminal) : IP serveur, port, nom, mot de passe
 java -cp Client/bin inf3405.client.Client
@@ -67,8 +67,8 @@ Ces fichiers sont rechargés au redémarrage du serveur.
 
 | Requis | Emplacement |
 |--------|-------------|
-| 4.1 Serveur (validation IP/port, multi-clients, diffusion, arrêt propre) | `Server`, `ClientHandler`, `MessageHistory` |
-| 4.2 Client (validation, auth, 15 récents, ≤200 car., temps réel) | `Client`, `MessageReceiver` |
-| 4.3 Authentification (4 cas, création auto) | `UserManager.authentifier` |
-| 4.4 Communications et format d'affichage | `Message`, `MessageHistory.diffuser` |
-| 4.5 Persistance (utilisateurs + historique) | `UserManager`, `MessageHistory` |
+| 4.1 Serveur (validation IP/port, multi-clients, diffusion, arrêt propre) | `Serveur`, `GestionnaireClient`, `HistoriqueMessages` |
+| 4.2 Client (validation, auth, 15 récents, ≤200 car., temps réel) | `Client`, `RecepteurMessages` |
+| 4.3 Authentification (4 cas, création auto) | `GestionnaireUtilisateurs.authentifier` |
+| 4.4 Communications et format d'affichage | `Message`, `HistoriqueMessages.diffuser` |
+| 4.5 Persistance (utilisateurs + historique) | `GestionnaireUtilisateurs`, `HistoriqueMessages` |

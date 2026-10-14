@@ -9,17 +9,17 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class ClientHandler implements Runnable {
+public class GestionnaireClient implements Runnable {
 
     private final Socket socket;
-    private final UserManager gestionnaireUtilisateurs;
-    private final MessageHistory historique;
+    private final GestionnaireUtilisateurs gestionnaireUtilisateurs;
+    private final HistoriqueMessages historique;
 
     private DataInputStream entree;
     private DataOutputStream sortie;
     private String nomUtilisateur;
 
-    public ClientHandler(Socket socket, UserManager gestionnaireUtilisateurs, MessageHistory historique) {
+    public GestionnaireClient(Socket socket, GestionnaireUtilisateurs gestionnaireUtilisateurs, HistoriqueMessages historique) {
         this.socket = socket;
         this.gestionnaireUtilisateurs = gestionnaireUtilisateurs;
         this.historique = historique;
@@ -33,9 +33,9 @@ public class ClientHandler implements Runnable {
 
             String nom = entree.readUTF();
             String motDePasse = entree.readUTF();
-            UserManager.Resultat resultat = gestionnaireUtilisateurs.authentifier(nom, motDePasse);
+            GestionnaireUtilisateurs.Resultat resultat = gestionnaireUtilisateurs.authentifier(nom, motDePasse);
 
-            if (resultat != UserManager.Resultat.ACCEPTE) {
+            if (resultat != GestionnaireUtilisateurs.Resultat.ACCEPTE) {
                 sortie.writeUTF("ERREUR");
                 sortie.writeUTF(messageRefus(resultat));
                 sortie.flush();
@@ -62,6 +62,7 @@ public class ClientHandler implements Runnable {
                 historique.diffuser(message.toString());
             }
         } catch (EOFException | SocketException e) {
+            System.out.println("Connexion fermee par le client.");
         } catch (IOException e) {
             System.err.println("Erreur avec un client : " + e.getMessage());
         } finally {
@@ -76,15 +77,14 @@ public class ClientHandler implements Runnable {
 
     public synchronized void envoyer(String message) {
         try {
-            if (sortie != null) {
-                sortie.writeUTF(message);
-                sortie.flush();
-            }
+            sortie.writeUTF(message);
+            sortie.flush();
         } catch (IOException e) {
+            System.err.println("Impossible d'envoyer le message a " + nomUtilisateur + " : " + e.getMessage());
         }
     }
 
-    private String messageRefus(UserManager.Resultat resultat) {
+    private String messageRefus(GestionnaireUtilisateurs.Resultat resultat) {
         switch (resultat) {
             case DEJA_CONNECTE:
                 return "Cet utilisateur est deja connecte.";
@@ -98,7 +98,8 @@ public class ClientHandler implements Runnable {
     private void fermer() {
         try {
             socket.close();
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la fermeture du socket : " + e.getMessage());
         }
     }
 }

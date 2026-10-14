@@ -3,11 +3,11 @@ package inf3405.client;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class MessageReceiver implements Runnable {
+public class RecepteurMessages implements Runnable {
 
     private final DataInputStream entree;
 
-    public MessageReceiver(DataInputStream entree) {
+    public RecepteurMessages(DataInputStream entree) {
         this.entree = entree;
     }
 

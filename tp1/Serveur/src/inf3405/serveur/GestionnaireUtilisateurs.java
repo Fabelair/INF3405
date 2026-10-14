@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class UserManager {
+public class GestionnaireUtilisateurs {
 
     private static final String FICHIER_UTILISATEURS = "utilisateurs.txt";
     private static final String SEPARATEUR = "\t";
@@ -28,7 +28,7 @@ public class UserManager {
         DEJA_CONNECTE
     }
 
-    public UserManager() {
+    public GestionnaireUtilisateurs() {
         charger();
     }
 

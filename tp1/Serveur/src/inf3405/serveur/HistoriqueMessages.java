@@ -12,23 +12,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageHistory {
+public class HistoriqueMessages {
 
     private static final String FICHIER_HISTORIQUE = "historique.txt";
     private static final int NB_MESSAGES_RECENTS = 15;
 
     private final List<String> historique = new ArrayList<>();
-    private final List<ClientHandler> clients = new ArrayList<>();
+    private final List<GestionnaireClient> clients = new ArrayList<>();
 
-    public MessageHistory() {
+    public HistoriqueMessages() {
         charger();
     }
 
-    public synchronized void enregistrerClient(ClientHandler client) {
+    public synchronized void enregistrerClient(GestionnaireClient client) {
         clients.add(client);
     }
 
-    public synchronized void retirerClient(ClientHandler client) {
+    public synchronized void retirerClient(GestionnaireClient client) {
         clients.remove(client);
     }
 
@@ -36,7 +36,7 @@ public class MessageHistory {
         historique.add(messageFormate);
         ajouterAuFichier(messageFormate);
         System.out.println(messageFormate);
-        for (ClientHandler client : clients) {
+        for (GestionnaireClient client : clients) {
             client.envoyer(messageFormate);
         }
     }

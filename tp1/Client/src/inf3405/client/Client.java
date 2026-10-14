@@ -45,7 +45,7 @@ public class Client {
             System.out.println("Tapez vos messages (max " + LONGUEUR_MAX_MESSAGE
                     + " caracteres). Tapez /quit pour quitter.\n");
 
-            Thread recepteur = new Thread(new MessageReceiver(entree));
+            Thread recepteur = new Thread(new RecepteurMessages(entree));
             recepteur.setDaemon(true);
             recepteur.start();
 
@@ -93,16 +93,14 @@ public class Client {
                 if (port >= PORT_MIN && port <= PORT_MAX) {
                     return port;
                 }
-            } catch (NumberFormatException ignore) {
+                System.out.println("Port invalide (entier entre " + PORT_MIN + " et " + PORT_MAX + ").");
+            } catch (NumberFormatException e) {
+                System.out.println("Port invalide (\"" + saisie + "\" n'est pas un nombre entier).");
             }
-            System.out.println("Port invalide (entier entre " + PORT_MIN + " et " + PORT_MAX + ").");
         }
     }
 
     public static boolean adresseIPValide(String ip) {
-        if (ip == null) {
-            return false;
-        }
         String[] octets = ip.split("\\.");
         if (octets.length != 4) {
             return false;

@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Server {
+public class Serveur {
 
     private static final int PORT_MIN = 5000;
     private static final int PORT_MAX = 5050;
@@ -17,8 +17,8 @@ public class Server {
         String adresseIP = lireAdresseIP(scanner);
         int port = lirePort(scanner);
 
-        UserManager gestionnaireUtilisateurs = new UserManager();
-        MessageHistory historique = new MessageHistory();
+        GestionnaireUtilisateurs gestionnaireUtilisateurs = new GestionnaireUtilisateurs();
+        HistoriqueMessages historique = new HistoriqueMessages();
 
         try (ServerSocket serveur = new ServerSocket(port, 50, InetAddress.getByName(adresseIP))) {
             System.out.println("Serveur demarre sur " + adresseIP + ":" + port);
@@ -28,14 +28,15 @@ public class Server {
                 System.out.println("\nArret du serveur...");
                 try {
                     serveur.close();
-                } catch (IOException ignore) {
+                } catch (IOException e) {
+                    System.err.println("Erreur lors de la fermeture du serveur : " + e.getMessage());
                 }
             }));
 
             while (true) {
                 Socket socket = serveur.accept();
-                ClientHandler handler = new ClientHandler(socket, gestionnaireUtilisateurs, historique);
-                new Thread(handler).start();
+                GestionnaireClient gestionnaire = new GestionnaireClient(socket, gestionnaireUtilisateurs, historique);
+                new Thread(gestionnaire).start();
             }
         } catch (IOException e) {
             System.err.println("Impossible de demarrer le serveur : " + e.getMessage());
@@ -62,16 +63,14 @@ public class Server {
                 if (port >= PORT_MIN && port <= PORT_MAX) {
                     return port;
                 }
-            } catch (NumberFormatException ignore) {
+                System.out.println("Port invalide. Entier compris entre " + PORT_MIN + " et " + PORT_MAX + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Port invalide. \"" + saisie + "\" n'est pas un nombre entier.");
             }
-            System.out.println("Port invalide. Entier compris entre " + PORT_MIN + " et " + PORT_MAX + ".");
         }
     }
 
     public static boolean adresseIPValide(String ip) {
-        if (ip == null) {
-            return false;
-        }
         String[] octets = ip.split("\\.");
         if (octets.length != 4) {
             return false;
